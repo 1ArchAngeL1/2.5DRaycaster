@@ -22,7 +22,7 @@ private:
 	float playerX = 0.f;
 	float playerY = 0.f;
 	float playerAngle = 0.f;
-	float fieldOfView = pi / 3.f;
+	float fieldOfView = pi / 4.f;
 
 
 public:

@@ -47,19 +47,24 @@ void Render::start() {
     std::vector<sf::RectangleShape> walls;
 
     std::vector<sf::Sprite> texturedWalls;
+    std::vector<sf::RectangleShape> floorRects;
+    std::vector<sf::RectangleShape> ceillingRects;
 
     //512 x 512
     sf::Texture txt;
-    txt.loadFromFile("texture.png");
+    txt.loadFromFile("texture.jfif");
 
     
     const float delay = 0.020f;
     sf::Clock clock;
     float chrono = 0;
     float maxDepth = (sqrt(Render::mapHght * Render::mapHght + Render::mapWdth * Render::mapWdth));
+
     Render::playerDir = sf::Vector2f(cosf(playerAngle), sinf(playerAngle));
 
-    float angleDiff = Render::fieldOfView / (2.f *  (float)Render::screenWdth);
+    float angleDiff = Render::fieldOfView / ((float)Render::screenWdth);
+
+    bool toPrint = false;
 
     while (window.isOpen())
     {
@@ -77,6 +82,7 @@ void Render::start() {
         if (chrono >= delay) {
             
             walls.clear();
+
             texturedWalls.clear();
             chrono = 0;
 
@@ -90,12 +96,11 @@ void Render::start() {
                 //Render::playerAngle -= 2.f *  deltaT;
                 Render::playerAngle -= 0.1f;
                 Render::playerDir = sf::Vector2f(cosf(playerAngle), sinf(playerAngle));
-               
             }
             
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-                float testCollisionX = playerX + cos(Render::playerAngle) * 0.2f;
-                float testCollisionY = playerY - sin(Render::playerAngle) * 0.2f;
+                float testCollisionX = Render::playerX + cos(Render::playerAngle) * 0.2f;
+                float testCollisionY = Render::playerY - sin(Render::playerAngle) * 0.2f;
                 if (Render::map[(int)testCollisionY * Render::mapWdth + (int)testCollisionX] != '1') {
                     Render::playerX = testCollisionX;
                     Render::playerY = testCollisionY;
@@ -135,23 +140,23 @@ void Render::start() {
 
                 if (dirX >= 0) {
                     dx = 1;
-                    float xOffset = 1 - (Render::playerX - currBoxX);
+                    float xOffset = 1 - (Render::playerX - (float)currBoxX);
                     xChangeDistance = xOffset * unitStepSizeX; 
                 }
                 else {
                     dx = -1;
-                    float xOffset = Render::playerX - currBoxX;
+                    float xOffset = Render::playerX - (float)currBoxX;
                     xChangeDistance = xOffset  * unitStepSizeX;
                 }
 
                 if (dirY >= 0) {
                     dy = -1;
-                    float yOffset = Render::playerY - currBoxY;
+                    float yOffset = Render::playerY - (float)currBoxY;
                     yChangeDistance = yOffset * unitStepSizeY;
                 }
                 else {
                     dy = 1;
-                    float yOffset = 1 - (Render::playerY - currBoxY);
+                    float yOffset = 1 - (Render::playerY - (float)currBoxY);
                     yChangeDistance = yOffset * unitStepSizeY;
                 }
 
@@ -168,18 +173,17 @@ void Render::start() {
                     }
 
 
- 
                     if (currBoxX >= 0 && currBoxX < Render::mapWdth && currBoxY >= 0 && currBoxY < Render::mapHght) {
                         if (Render::map[(currBoxY * Render::mapWdth) + currBoxX] == '1') {
                             hitwall = true;
 
-
                             float testX = (Render::playerX + dirX * distanceToWall);
-                            float testY = (Render::playerY + dirY * distanceToWall);
+                            float testY = (Render::playerY - dirY * distanceToWall);
 
-                            int blockX = (int)(Render::playerX + dirX * distanceToWall);
-                            int blockY = (int)(Render::playerY + dirY * distanceToWall);
+                            /*std::cout << "y:" << currBoxY << " x:" << currBoxX << std::endl;
+                            std::cout << "y:" << testY << " x:" << testX << std::endl;*/
 
+                         
                           /*  std::vector<std::pair<float ,float >> edges;*/
                             
                            /* for (int tx = 0; tx < 2; tx++) {
@@ -198,20 +202,26 @@ void Render::start() {
                             if (edges[0].second <= angleDiff || edges[1].second <= angleDiff)isEdge = true;*/
 
 
-                            sf::Vector2f blockCenter((float)blockX + 0.5f, (float)blockY + 0.5f);
+                          
+                            sf::Vector2f blockCenter((float)currBoxX + 0.5f, (float)currBoxY + 0.5f);
 
                             sf::Vector2f forAngle(testX - blockCenter.x, testY - blockCenter.y);
+   
+                            float testAngle = atan2f(testY - blockCenter.y, testX - blockCenter.x);
 
 
-                            float testAngle = atan(forAngle.y / forAngle.x);
-
-                            if ((testAngle >= Render::pi / 4.f && testAngle <= (3.f / 4.f) * Render::pi) || (testAngle < -Render::pi / 4.f && testAngle > -(3.f / 4.f) * Render::pi)) {
-                                pos = testX - (float)blockX;
+                            if ((testAngle >= Render::pi / 4.f && testAngle <= (3.f / 4.f) * Render::pi)){
+                                pos = testX - (int)testX;
                             }
-                            else {
-                                pos = testY - (float)blockY;
+                            else if ((testAngle <= -Render::pi / 4.f && testAngle >= -Render::pi * (3.f / 4.f))) {
+                                pos = testX - (int)testX;
                             }
-
+                            else if (testAngle <= Render::pi / 4.f && testAngle >= -Render::pi / 4.f) {
+                                pos = testY - (int)testY;
+                            }
+                            else if (testAngle >= (3.f / 4.f) * Render::pi || testAngle <= -(3.f / 4.f) * Render::pi) {
+                                pos = testY - (int)testY;
+                            }
                             
                         }
                     }

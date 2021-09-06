@@ -5,7 +5,7 @@
 
 
 int main() {
-	Render render(720,1080);
+	Gos_Render render(720,1080);
 
 	std::string map;
 
@@ -63,11 +63,11 @@ int main() {
 
 
 	render.setMap(map,50,50);
+
 	render.setPosition(2,1.5f);
+
 	//render.setPosition(46, 11);
 	render.start();
-
-	std::cout << map[13] << std::endl;
 
 
 	return 0;

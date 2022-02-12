@@ -1,6 +1,4 @@
-#include "GraphicEngine.h"
-
-#include "Functionals.h"
+#include "RayCaster.h"
 
 
 float Gos_Render::angleBetweenVectors(sf::Vector2f vec1, sf::Vector2f vec2) {

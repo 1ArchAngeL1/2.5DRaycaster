@@ -137,7 +137,6 @@ void Gos_Render::start() {
 
     float maxDepth = (sqrt(Gos_Render::mapHght * Gos_Render::mapHght + Gos_Render::mapWdth * Gos_Render::mapWdth));
 
-   
 
     sf::ContextSettings settings;
     settings.antialiasingLevel = 4;
@@ -161,8 +160,8 @@ void Gos_Render::start() {
     //Render::makeDarkSky(stars);
 
     
-   /* Gos_Render::initCeilling(Gos_Render::ceillingRects, 170);
-    Gos_Render::initFloor(Gos_Render::floorRects, 170);*/
+   // Gos_Render::initCeilling(Gos_Render::ceillingRects, 170);
+    //Gos_Render::initFloor(Gos_Render::floorRects, 170);
    
 
     sf::Clock clock;
@@ -194,8 +193,7 @@ void Gos_Render::start() {
         if (chrono >= Gos_Render::delay) {
 
             Gos_Render::texturedWalls.clear();
-
-            
+            Gos_Render::walls.clear();
    
             chrono = 0;
 
@@ -310,7 +308,7 @@ void Gos_Render::start() {
                             float testY = (Gos_Render::playerY - dirY * distanceToWall);
 
                            
-                            /*std::vector<std::pair<float ,float >> edges;
+                            std::vector<std::pair<float ,float >> edges;
                             
                             for (int tx = 0; tx < 2; tx++) {
                                 for (int ty = 0; ty < 2; ty++) {
@@ -325,7 +323,7 @@ void Gos_Render::start() {
 
                             std::sort(edges.begin(), edges.end(), [](const std::pair<float, float>& left, const std::pair<float, float>& right) {return left.first < right.first;});
 
-                            if (edges[0].second < angleDiff || edges[1].second < angleDiff)isEdge = true;*/
+                            if (edges[0].second < angleDiff || edges[1].second < angleDiff)isEdge = true;
 
                             sf::Vector2f blockCenter((float)currBoxX + 0.5f, (float)currBoxY + 0.5f);
 
@@ -366,14 +364,14 @@ void Gos_Render::start() {
                 float wallHeight = ((Gos_Render::distanceToProjectionPlane) / distanceToWall) * Gos_Render::screenHght;
 
 
-                //float ceilling = (float)(Gos_Render::screenHght / 2.f) - (Gos_Render::screenHght / (float)distanceToWall);
+                //loat ceilling = (float)(Gos_Render::screenHght / 2.f) - (Gos_Render::screenHght / (float)distanceToWall);
                 
                 float ceilling = (Gos_Render::wallMiddle) - (wallHeight / 2.f);
 
                 float floor = screenHght - ceilling;
 
 
-              /*  sf::RectangleShape wall;
+                sf::RectangleShape wall;
                 wall.setSize(sf::Vector2f(1,wallHeight));
                 wall.setPosition(sf::Vector2f(i, ceilling));
 
@@ -386,36 +384,36 @@ void Gos_Render::start() {
                          247 - (distanceToWall / (float)Gos_Render::mapWdth) * 247,
                          135 - (distanceToWall / (float)Gos_Render::mapWdth) * 135));
                  }
-                 Gos_Render::walls.push_back(wall);*/
+                 Gos_Render::walls.push_back(wall);
 
 
-                sf::Sprite wallSprite;
-                wallSprite.setTexture(wallTexture);
-                wallSprite.setTextureRect(sf::IntRect(pos * 1024, 0, 1, 1024));
-                wallSprite.setScale(sf::Vector2f(1, (wallHeight) / 1024.f));
-                wallSprite.setPosition(sf::Vector2f(i, ceilling));
-
-                int color = 256 - (distanceToWall / (float)Gos_Render::mapWdth) * 256;
-                wallSprite.setColor(sf::Color(color, color, color));
-                texturedWalls.push_back(wallSprite);
+//                sf::Sprite wallSprite;
+//                wallSprite.setTexture(wallTexture);
+//                wallSprite.setTextureRect(sf::IntRect(pos * 1024, 0, 1, 1024));
+//                wallSprite.setScale(sf::Vector2f(1, (wallHeight) / 1024.f));
+//                wallSprite.setPosition(sf::Vector2f(i, ceilling));
+//
+//                int color = 256 - (distanceToWall / (float)Gos_Render::mapWdth) * 256;
+//                wallSprite.setColor(sf::Color(color, color, color));
+//                texturedWalls.push_back(wallSprite);
              
             }
 
            
-            Gos_Render::initTexturedFloor(floorTexture,ceillingTexture);
+           // Gos_Render::initTexturedFloor(floorTexture,ceillingTexture);
         }
 
        
 
-        sf::Texture floorBack;
-        floorBack.loadFromImage(Gos_Render::img);
-        sf::Sprite floorSprite;
-        floorSprite.setTexture(floorBack);
-        floorSprite.setPosition(sf::Vector2f(0, 0));
+//        sf::Texture floorBack;
+//        floorBack.loadFromImage(Gos_Render::img);
+//        sf::Sprite floorSprite;
+//        floorSprite.setTexture(floorBack);
+//        floorSprite.setPosition(sf::Vector2f(0, 0));
        
         window.clear();
-        window.draw(floorSprite);
-        for (int i = 0; i < Gos_Render::texturedWalls.size(); i++)window.draw(Gos_Render::texturedWalls[i]);
+        //window.draw(floorSprite);
+        for (int i = 0; i < Gos_Render::walls.size(); i++)window.draw(Gos_Render::walls[i]);
         window.display();
     }
     return;

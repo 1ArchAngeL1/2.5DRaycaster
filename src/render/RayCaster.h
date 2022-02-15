@@ -2,11 +2,10 @@
 
 #include "SFML/Graphics.hpp"
 #include<iostream>
-#include "math.h"
 #include "../GameConstants.h"
 #include "../math/GameMath.h"
-//rayacster using DDA algorithm
 
+//rayacster using DDA algorithm
 namespace GosRender {
 
     struct RayResponse {
@@ -17,25 +16,27 @@ namespace GosRender {
 
     class Player {
     public:
-        //2d vector that describes direction of the player
-        Player () {
-            distanceToProjectionPlane = (0.5f) / tanf(fieldOfView / 2.f);
-            player_dir = sf::Vector2f(cosf(playerAngle), sinf(playerAngle));
-        }
+        explicit Player(sf::Vector2f position) : player_position(position) {}
 
-        sf::Vector2f player_dir;
+        Player() = default;
 
         sf::Vector2f player_position;
-
-        float distanceToProjectionPlane;
 
         const float fieldOfView = PI / 4.f;
 
         float playerAngle = 0.f;
+
+        sf::Vector2f player_dir = sf::Vector2f(cosf(playerAngle), sinf(playerAngle));
+
+        float distanceToProjectionPlane = (0.5f) / tanf(fieldOfView / 2.f);
     };
 
     class Map {
     public:
+        Map(std::string map, int map_width, int map_height) : map(map), map_width(map_width), map_height(map_height) {}
+
+        Map() = default;
+
         std::string map;
 
         int map_width;
@@ -44,8 +45,7 @@ namespace GosRender {
     };
 
 
-    void Render(GosRender::Player&, GosRender::Map&);
-
+    void Render(GosRender::Player &, GosRender::Map &);
 
 
 }

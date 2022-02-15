@@ -3,7 +3,9 @@
 
 #include "../render/RayCaster.h"
 
+
 int main() {
+
     std::string map;
 
     map += "11111111111111111111111111111111111111111111111111";

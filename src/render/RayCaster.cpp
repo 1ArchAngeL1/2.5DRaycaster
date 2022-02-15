@@ -3,20 +3,17 @@
 
 static std::vector<sf::Sprite> textured_walls;
 
-static std::vector<sf::Sprite> textured_ceilling;
-
 static std::vector<sf::RectangleShape> walls;
 
 static std::vector<sf::RectangleShape> floor_rects;
 
 static std::vector<sf::RectangleShape> ceilling_rects;
 
-static std::vector<float> wall_heights;
+static sf::Texture wall_texture;
 
-static std::vector<float> distnces;
+static sf::Texture floor_texture;
 
-//special sky with only stars
-static std::vector<sf::CircleShape> stars;
+static sf::Texture ceilling_texture;
 
 
 static void InitFloor(std::vector<sf::RectangleShape> &floorRects, int clr) {
@@ -52,10 +49,6 @@ static void MakeDarkSky(std::vector<sf::CircleShape> &ceiling_rects) {
 }
 
 
-sf::Vector2f operator*=(sf::Vector2f vec, int num) {
-    return sf::Vector2f(vec.x * num, vec.y * num);
-}
-
 sf::Image RenderCeillingAndFloor(sf::Texture &floorTexture, sf::Texture &ceillingTexture, GosRender::Player &player) {
     auto image = floorTexture.copyToImage();
 
@@ -79,20 +72,19 @@ sf::Image RenderCeillingAndFloor(sf::Texture &floorTexture, sf::Texture &ceillin
 
         float step_y = straight_distance_to_point * (right_vector.y - left_vector.y) / GosRender::screen_width;
 
-        float floorX = player.player_position.x + straight_distance_to_point * left_vector.x;
+        float floor_x = player.player_position.x + straight_distance_to_point * left_vector.x;
 
-        float floorY = player.player_position.y - straight_distance_to_point * left_vector.y;
+        float floor_y = player.player_position.y - straight_distance_to_point * left_vector.y;
 
         for (int j = 0; j < GosRender::screen_width; j++) {
-            int cellX = (int) floorX;
-            int cellY = (int) floorY;
+            int cell_x = (int) floor_x;
+            int cell_y = (int) floor_y;
 
-            unsigned int pixX = (static_cast<int>(image.getSize().x * abs(floorX - cellX)) % (image.getSize().x - 1));
-            unsigned int pixY = (static_cast<int>(image.getSize().y * abs(floorY - cellY)) % (image.getSize().y - 1));
+            unsigned int pixX = (static_cast<int>(image.getSize().x * abs(floor_x - cell_x)) % (image.getSize().x - 1));
+            unsigned int pixY = (static_cast<int>(image.getSize().y * abs(floor_y - cell_y)) % (image.getSize().y - 1));
 
-
-            floorX += step_x;
-            floorY -= step_y;
+            floor_x += step_x;
+            floor_y -= step_y;
 
             result.setPixel(j, i, image.getPixel(pixX, pixY));
             result.setPixel(j, GosRender::screen_height - i, ceilling_image.getPixel(pixX, pixY));
@@ -207,21 +199,14 @@ GosRender::RayResponse CastRay(GosRender::Player &player, float ray_angle, GosRe
 }
 
 static void LoadTextures() {
-    sf::Texture wall_texture;
     wall_texture.loadFromFile("../resources/wall_texture.jpeg");
 
-    sf::Texture floor_texture;
     floor_texture.loadFromFile("../resources/wall_texture.jpeg");
 
-    sf::Texture ceilling_texture;
     ceilling_texture.loadFromFile("../resources/wall_texture.jpeg");
 }
 
 void GosRender::Render(GosRender::Player &player, GosRender::Map &map) {
-    float max_distance = (sqrt(
-            map.map_height * map.map_height + map.map_width * map.map_width));
-    //float max_distance = map.map_height;
-
     sf::ContextSettings settings;
     settings.antialiasingLevel = 4;
 
@@ -229,11 +214,12 @@ void GosRender::Render(GosRender::Player &player, GosRender::Map &map) {
                             sf::Style::Default,
                             settings);
 
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(90);
 
-    std::vector<float> distanceToWalls;
+    LoadTextures();
 
-
+    float max_distance = (sqrt(
+            map.map_height * map.map_height + map.map_width * map.map_width));
 
     sf::Clock clock;
     float delta_time;
@@ -243,10 +229,13 @@ void GosRender::Render(GosRender::Player &player, GosRender::Map &map) {
 
     while (window.isOpen()) {
         sf::Event event;
+
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
                 window.close();
+            }
         }
+
         textured_walls.clear();
         walls.clear();
         delta_time = clock.restart().asSeconds();
@@ -298,8 +287,6 @@ void GosRender::Render(GosRender::Player &player, GosRender::Map &map) {
             float distance_to_wall = respo.distance;
             bool is_edge = respo.is_edge;
             float pos = respo.collision_position;
-
-            distanceToWalls.push_back(distance_to_wall);
 
             float fishEyeAngleFix = CosineOfAngleBetweenVectors(player.player_dir,
                                                                 sf::Vector2f(dir_x, dir_y));

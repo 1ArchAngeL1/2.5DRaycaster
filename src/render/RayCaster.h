@@ -29,6 +29,10 @@ namespace GosRender {
         sf::Vector2f player_dir = sf::Vector2f(cosf(playerAngle), sinf(playerAngle));
 
         float distanceToProjectionPlane = (0.5f) / tanf(fieldOfView / 2.f);
+
+        float player_height = screen_height / 2;
+
+        float looking_arroy_center = screen_height / 2;
     };
 
     class Map {

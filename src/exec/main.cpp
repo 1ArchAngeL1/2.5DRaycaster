@@ -6,8 +6,6 @@
 
 int main() {
 
-    std::cout << GosRender::GenerateMaze(2,2) << std::endl;
-    return 0;
 
     std::string map;
 
@@ -62,21 +60,22 @@ int main() {
     map += "1................................................1";
     map += "11111111111111111111111111111111111111111111111111";
 
+    map = GosRender::GenerateMaze(5, 5);
 
     GosRender::Player game_player;
-    game_player.player_position = sf::Vector2f(2,1.5f);
+    game_player.player_position = sf::Vector2f(1.5f, 1.5f);
     GosRender::Map game_map;
 
     game_map.map = map;
-    game_map.map_height = 50;
-    game_map.map_width = 50;
+    game_map.map_height = 15;
+    game_map.map_width = 15;
 
     //render.SetMap(map, 50, 50);
 
     //render.SetPosition(2, 1.5f);
 
     //render.SetPosition(46, 11);
-    GosRender::Render(game_player,game_map);
+    GosRender::Render(game_player, game_map);
 
 
     return 0;

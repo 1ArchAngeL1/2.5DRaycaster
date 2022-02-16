@@ -60,7 +60,7 @@ sf::Image RenderCeillingAndFloor(sf::Texture &floorTexture, sf::Texture &ceillin
     for (int i = GosRender::wall_middle; i < GosRender::screen_height; i++) {
 
         float straight_distance_to_point = player.distanceToProjectionPlane *
-                                           ((GosRender::screen_height / 2.f) / (i - (GosRender::screen_height / 2.f)));
+                                           ((GosRender::screen_height / 2) / (i - player.player_height));
 
         sf::Vector2f left_vector(cosf(player.playerAngle - (player.fieldOfView / 2.f)),
                                  sinf(player.playerAngle - (player.fieldOfView / 2.f)));
@@ -119,7 +119,7 @@ static bool IsEdge(GosRender::Player &player, int box_x, int box_y, sf::Vector2f
 
 
 static float GetTexturePositionColumn(int box_x, int box_y, float test_x, float test_y) {
-    float pos;
+    float pos = 0;
     sf::Vector2f blockCenter((float) box_x + 0.5f, (float) box_y + 0.5f);
 
     float testAngle = atan2f(test_y - blockCenter.y, test_x - blockCenter.x);
@@ -272,6 +272,10 @@ void GosRender::Render(GosRender::Player &player, GosRender::Map &map) {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
             player.player_position.x -= static_cast<float>(cos(player.playerAngle) * 4.5 * delta_time);
             player.player_position.y += static_cast<float>(sin(player.playerAngle) * 4.5 * delta_time);
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+            player.player_height += 100 * delta_time;
         }
 
         for (int ray = 0; ray < GosRender::screen_width; ray++) {

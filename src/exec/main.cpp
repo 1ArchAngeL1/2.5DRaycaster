@@ -2,9 +2,12 @@
 
 
 #include "../render/RayCaster.h"
-
+#include "../maze/MazeGeneration.h"
 
 int main() {
+
+    std::cout << GosRender::GenerateMaze(2,2) << std::endl;
+    return 0;
 
     std::string map;
 

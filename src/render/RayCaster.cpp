@@ -80,14 +80,14 @@ sf::Image RenderCeillingAndFloor(sf::Texture &floorTexture, sf::Texture &ceillin
             int cell_x = (int) floor_x;
             int cell_y = (int) floor_y;
 
-            unsigned int pixX = (static_cast<int>(image.getSize().x * abs(floor_x - cell_x)) % (image.getSize().x - 1));
-            unsigned int pixY = (static_cast<int>(image.getSize().y * abs(floor_y - cell_y)) % (image.getSize().y - 1));
+            unsigned int pix_x = (static_cast<int>(image.getSize().x * abs(floor_x - cell_x)) % (image.getSize().x - 1));
+            unsigned int pix_y = (static_cast<int>(image.getSize().y * abs(floor_y - cell_y)) % (image.getSize().y - 1));
 
             floor_x += step_x;
             floor_y -= step_y;
 
-            result.setPixel(j, i, image.getPixel(pixX, pixY));
-            result.setPixel(j, GosRender::screen_height - i, ceilling_image.getPixel(pixX, pixY));
+            result.setPixel(j, i, image.getPixel(pix_x, pix_y));
+            result.setPixel(j, GosRender::screen_height - i, ceilling_image.getPixel(pix_x, pix_y));
         }
     }
     return result;
@@ -144,8 +144,6 @@ GosRender::RayResponse CastRay(GosRender::Player &player, float ray_angle, GosRe
     float dir_x = cosf(ray_angle), dir_y = sinf(ray_angle);
     float unit_step_x = abs(1.f / dir_x), unit_step_y = abs(1.f / dir_y);
     float x_change_distance = 0, y_change_distance = 0;
-    float pos = 0;
-    bool hit_wall = false;
     float distance_to_wall = 0;
     int curr_box_x = static_cast<int>(player.player_position.x);
     int curr_box_y = static_cast<int>(player.player_position.y);
@@ -171,7 +169,7 @@ GosRender::RayResponse CastRay(GosRender::Player &player, float ray_angle, GosRe
         y_change_distance = yOffset * unit_step_y;
     }
 
-    while (!hit_wall && distance_to_wall < map.map_width) {
+    while (distance_to_wall < map.map_width) {
         if (x_change_distance < y_change_distance) {
             curr_box_x += dx;
             distance_to_wall = x_change_distance;

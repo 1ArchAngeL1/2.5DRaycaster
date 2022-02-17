@@ -9,4 +9,3 @@ int GosRender::screen_width = 1920;
 
 int GosRender::screen_height = 1080;
 
-int GosRender::wall_middle = screen_height / 2;

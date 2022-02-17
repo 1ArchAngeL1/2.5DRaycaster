@@ -11,8 +11,6 @@ namespace GosRender {
 
     extern int screen_height;
 
-    extern int wall_middle;
-
 }
 
 

@@ -24,7 +24,6 @@ std::string GosRender::MazeToString(MazeBlock *maze, int map_width, int map_heig
             }
             maze_str += '1';
         }
-       // maze_str +='\n';
         for (int j = 0; j < map_width; j++) {
             if (maze[i * map_width + j].left != NULL) {
                 maze_str += '.';
@@ -38,7 +37,6 @@ std::string GosRender::MazeToString(MazeBlock *maze, int map_width, int map_heig
                 maze_str += '1';
             }
         }
-       // maze_str +='\n';
         std::cout << std::endl;
         for (int j = 0; j < map_width; j++) {
             maze_str += '1';
@@ -49,9 +47,7 @@ std::string GosRender::MazeToString(MazeBlock *maze, int map_width, int map_heig
             }
             maze_str += '1';
         }
-       // maze_str +='\n';
     }
-    std::cout << maze_str << std::endl;
     return maze_str;
 }
 
@@ -69,13 +65,14 @@ bool CheckValid(int curr_x, int curr_y, int map_width, int map_height) {
             curr_y < map_height);
 }
 
-void Generate(GosRender::MazeBlock *maze, int map_width, int map_height, int curr_x, int curr_y) {
+static void Generate(GosRender::MazeBlock *maze, int map_width, int map_height, int curr_x, int curr_y) {
     std::vector<int> indexes = RandomShuffle();
+    std::pair<int, int> move;
     GosRender::MazeBlock *current = &maze[curr_y * map_width + curr_x];
     current->visited = true;
     for (int i = 0; i < 4; i++) {
         indexes = RandomShuffle();
-        std::pair<int, int> move = moves[indexes[rand() % 4]];
+        move = moves[indexes[rand() % 4]];
         if (!CheckValid(curr_x + move.first, curr_y + move.second, map_width, map_height))continue;
         GosRender::MazeBlock *next = &maze[((curr_y + move.second) * map_width) + curr_x + move.first];
         if (!next->visited) {

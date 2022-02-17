@@ -24,15 +24,15 @@ namespace GosRender {
 
         const float fieldOfView = PI / 4.f;
 
-        float playerAngle = 0.f;
+        float player_angle = 0.f;
 
-        sf::Vector2f player_dir = sf::Vector2f(cosf(playerAngle), sinf(playerAngle));
+        sf::Vector2f player_dir = sf::Vector2f(cosf(player_angle), sinf(player_angle));
 
         float distanceToProjectionPlane = (0.5f) / tanf(fieldOfView / 2.f);
 
         float player_height = screen_height / 2;
 
-        float looking_arroy_center = screen_height / 2;
+        float projection_center = screen_height / 2;
     };
 
     class Map {

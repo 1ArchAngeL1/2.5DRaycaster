@@ -16,25 +16,25 @@ static sf::Texture floor_texture;
 static sf::Texture ceilling_texture;
 
 
-static void InitFloor(std::vector<sf::RectangleShape> &floorRects, int clr) {
+static void InitFloor(std::vector<sf::RectangleShape> &floor_rects, int clr) {
     for (int i = GosRender::screen_height / 2; i < (int) GosRender::screen_height; i += 3) {
         int color = clr * ((i - (GosRender::screen_height / 2.f)) / (GosRender::screen_height / 2.f));
         sf::RectangleShape shape;
         shape.setSize(sf::Vector2f(GosRender::screen_width, 3));
         shape.setPosition(sf::Vector2f(0, i));
         shape.setFillColor(sf::Color(color, color, color));
-        floorRects.push_back(shape);
+        floor_rects.push_back(shape);
     }
 }
 
-static void InitCeilling(std::vector<sf::RectangleShape> &ceillingRects, int clr) {
+static void InitCeilling(std::vector<sf::RectangleShape> &ceilling_rects, int clr) {
     for (int i = 0; i < GosRender::screen_height / 2; i += 3) {
-        int color = clr - clr * (i / (GosRender::screen_height / 2.f));
+        int color = clr - clr * (i / (GosRender::screen_height * 0.5f));
         sf::RectangleShape shape;
         shape.setSize(sf::Vector2f(GosRender::screen_width, 3));
         shape.setPosition(sf::Vector2f(0, i));
         shape.setFillColor(sf::Color(color, color, color));
-        ceillingRects.push_back(shape);
+        ceilling_rects.push_back(shape);
     }
 }
 
@@ -49,24 +49,56 @@ static void MakeDarkSky(std::vector<sf::CircleShape> &ceiling_rects) {
 }
 
 
-sf::Image RenderCeillingAndFloor(sf::Texture &floorTexture, sf::Texture &ceillingTexture, GosRender::Player &player) {
-    auto image = floorTexture.copyToImage();
-
-    auto ceilling_image = ceillingTexture.copyToImage();
-
-    sf::Image result;
-    result.create(GosRender::screen_width, GosRender::screen_height, sf::Color::Black);
-
-    for (int i = GosRender::wall_middle; i < GosRender::screen_height; i++) {
+void RenderFloor(sf::Texture &floor_texture, sf::Image &target_image, GosRender::Player &player) {
+    auto floor_image = floor_texture.copyToImage();
+    for (int i = player.projection_center; i < GosRender::screen_height; i++) {
 
         float straight_distance_to_point = player.distanceToProjectionPlane *
-                                           ((GosRender::screen_height / 2) / (i - player.player_height));
+                                           (player.player_height / (i - player.projection_center));
 
-        sf::Vector2f left_vector(cosf(player.playerAngle - (player.fieldOfView / 2.f)),
-                                 sinf(player.playerAngle - (player.fieldOfView / 2.f)));
+        sf::Vector2f left_vector(cosf(player.player_angle - (player.fieldOfView / 2.f)),
+                                 sinf(player.player_angle - (player.fieldOfView / 2.f)));
 
-        sf::Vector2f right_vector(cosf(player.playerAngle + (player.fieldOfView / 2.f)),
-                                  sinf(player.playerAngle + (player.fieldOfView / 2.f)));
+        sf::Vector2f right_vector(cosf(player.player_angle + (player.fieldOfView / 2.f)),
+                                  sinf(player.player_angle + (player.fieldOfView / 2.f)));
+
+        float step_x = straight_distance_to_point * (right_vector.x - left_vector.x) / GosRender::screen_width;
+
+        float step_y = straight_distance_to_point * (right_vector.y - left_vector.y) / GosRender::screen_width;
+
+        float floor_x = player.player_position.x + straight_distance_to_point * left_vector.x;
+
+        float floor_y = player.player_position.y - straight_distance_to_point * left_vector.y;
+
+        for (int j = 0; j < GosRender::screen_width; j++) {
+            int cell_x = static_cast<int>(floor_x);
+            int cell_y = static_cast<int>(floor_y);
+
+            unsigned int pix_x = (static_cast<int>(floor_image.getSize().x * abs(floor_x - cell_x)) %
+                                  (floor_image.getSize().x - 1));
+            unsigned int pix_y = (static_cast<int>(floor_image.getSize().y * abs(floor_y - cell_y)) %
+                                  (floor_image.getSize().y - 1));
+
+            floor_x += step_x;
+            floor_y -= step_y;
+
+            target_image.setPixel(j, i, floor_image.getPixel(pix_x, pix_y));
+        }
+    }
+}
+
+void RenderCeillling(sf::Texture &floor_texture, sf::Image &target_image, GosRender::Player &player) {
+    auto ceilling_image = floor_texture.copyToImage();
+    for (int i = 0; i < player.projection_center; i++) {
+
+        float straight_distance_to_point = player.distanceToProjectionPlane *
+                                           (player.player_height / (player.projection_center - i));
+
+        sf::Vector2f left_vector(cosf(player.player_angle - (player.fieldOfView / 2.f)),
+                                 sinf(player.player_angle - (player.fieldOfView / 2.f)));
+
+        sf::Vector2f right_vector(cosf(player.player_angle + (player.fieldOfView / 2.f)),
+                                  sinf(player.player_angle + (player.fieldOfView / 2.f)));
 
         float step_x = straight_distance_to_point * (right_vector.x - left_vector.x) / GosRender::screen_width;
 
@@ -80,17 +112,17 @@ sf::Image RenderCeillingAndFloor(sf::Texture &floorTexture, sf::Texture &ceillin
             int cell_x = (int) floor_x;
             int cell_y = (int) floor_y;
 
-            unsigned int pix_x = (static_cast<int>(image.getSize().x * abs(floor_x - cell_x)) % (image.getSize().x - 1));
-            unsigned int pix_y = (static_cast<int>(image.getSize().y * abs(floor_y - cell_y)) % (image.getSize().y - 1));
+            unsigned int pix_x = (static_cast<int>(ceilling_image.getSize().x * abs(floor_x - cell_x)) %
+                                  (ceilling_image.getSize().x - 1));
+            unsigned int pix_y = (static_cast<int>(ceilling_image.getSize().y * abs(floor_y - cell_y)) %
+                                  (ceilling_image.getSize().y - 1));
 
             floor_x += step_x;
             floor_y -= step_y;
 
-            result.setPixel(j, i, image.getPixel(pix_x, pix_y));
-            result.setPixel(j, GosRender::screen_height - i, ceilling_image.getPixel(pix_x, pix_y));
+            target_image.setPixel(j, i, ceilling_image.getPixel(pix_x, pix_y));
         }
     }
-    return result;
 }
 
 static bool IsEdge(GosRender::Player &player, int box_x, int box_y, sf::Vector2f dir) {
@@ -205,25 +237,27 @@ static void LoadTextures() {
 }
 
 void GosRender::Render(GosRender::Player &player, GosRender::Map &map) {
+    sf::Image image;
     sf::ContextSettings settings;
     settings.antialiasingLevel = 4;
 
     sf::RenderWindow window(sf::VideoMode(GosRender::screen_width, GosRender::screen_height), "2.5D",
                             sf::Style::Default,
                             settings);
+    window.setMouseCursorVisible(false);
 
     window.setFramerateLimit(90);
 
     LoadTextures();
 
-    float max_distance = (sqrt(
-            map.map_height * map.map_height + map.map_width * map.map_width));
-
+    float max_distance = sqrt(map.map_height * map.map_height + map.map_width * map.map_width);
     sf::Clock clock;
     float delta_time;
-    player.player_dir = sf::Vector2f(cosf(player.playerAngle), sinf(player.playerAngle));
+    player.player_dir = sf::Vector2f(cosf(player.player_angle), sinf(player.player_angle));
     InitCeilling(ceilling_rects, sf::Color::White.r);
     InitFloor(floor_rects, sf::Color::White.r);
+    const sf::Vector2f screen_center = sf::Vector2f((float) screen_width * 0.5f, (float) screen_height * 0.5f);
+
 
     while (window.isOpen()) {
         sf::Event event;
@@ -238,30 +272,39 @@ void GosRender::Render(GosRender::Player &player, GosRender::Map &map) {
         walls.clear();
         delta_time = clock.restart().asSeconds();
 
+//        sf::Vector2f mouse_delta = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window)) - screen_center;
+//        sf::Mouse::setPosition((sf::Vector2i)screen_center, window);
+
+
+
+
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-            player.playerAngle += 3 * delta_time;
-            player.player_dir = sf::Vector2f(cosf(player.playerAngle), sinf(player.playerAngle));
+            player.player_angle += 3 * delta_time;
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-            player.playerAngle -= 3 * delta_time;
-            player.player_dir = sf::Vector2f(cosf(player.playerAngle), sinf(player.playerAngle));
+            player.player_angle -= 3 * delta_time;
         }
 
+        player.player_dir = sf::Vector2f(cosf(player.player_angle), sinf(player.player_angle));
+
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-            GosRender::wall_middle -= 100.f * delta_time;
+            float value = player.projection_center - 250.f * delta_time;
+            if (value > 0) player.projection_center = value;
+
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-            GosRender::wall_middle += 100.f * delta_time;
+            float value = player.projection_center + 250.f * delta_time;
+            if (value < screen_height) player.projection_center = value;
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
             float testCollisionX =
-                    player.player_position.x + static_cast<float>(cos(player.playerAngle) * 4.5 * delta_time);
+                    player.player_position.x + static_cast<float>(cos(player.player_angle) * 4.5 * delta_time);
 
             float testCollisionY =
-                    player.player_position.y - static_cast<float>(sin(player.playerAngle) * 4.5 * delta_time);
+                    player.player_position.y - static_cast<float>(sin(player.player_angle) * 4.5 * delta_time);
 
             if (map.map[(int) testCollisionY * map.map_width + (int) testCollisionX] != '1') {
                 player.player_position.x = testCollisionX;
@@ -270,17 +313,17 @@ void GosRender::Render(GosRender::Player &player, GosRender::Map &map) {
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-            player.player_position.x -= static_cast<float>(cos(player.playerAngle) * 4.5 * delta_time);
-            player.player_position.y += static_cast<float>(sin(player.playerAngle) * 4.5 * delta_time);
+            player.player_position.x -= static_cast<float>(cos(player.player_angle) * 4.5 * delta_time);
+            player.player_position.y += static_cast<float>(sin(player.player_angle) * 4.5 * delta_time);
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
             player.player_height += 100 * delta_time;
         }
 
-        for (int ray = 0; ray < GosRender::screen_width; ray++) {
-            float ray_angle = (player.playerAngle - (player.fieldOfView / 2.f) +
-                               ((float) ray / (float) GosRender::screen_width) * player.fieldOfView);
+        for (int ray_column = 0; ray_column < GosRender::screen_width; ray_column++) {
+            float ray_angle = (player.player_angle - (player.fieldOfView / 2.f) +
+                               ((float) ray_column / (float) GosRender::screen_width) * player.fieldOfView);
 
             float dir_x = cosf(ray_angle);
             float dir_y = sinf(ray_angle);
@@ -296,13 +339,13 @@ void GosRender::Render(GosRender::Player &player, GosRender::Map &map) {
 
             float wall_height = ((player.distanceToProjectionPlane) / distance_to_wall) * GosRender::screen_height;
 
-            float ceilling = (GosRender::wall_middle) - (wall_height / 2.f);
+            float ceilling = (player.projection_center) - (wall_height / 2.f);
 
             float floor = GosRender::screen_height - ceilling;
 
 //            sf::RectangleShape wall;
 //            wall.setSize(sf::Vector2f(1, wall_height));
-//            wall.setPosition(sf::Vector2f(ray, ceilling));
+//            wall.setPosition(sf::Vector2f(ray_column, ceilling));
 //            if (is_edge) {
 //                wall.setFillColor(sf::Color::Black);
 //            } else {
@@ -318,14 +361,14 @@ void GosRender::Render(GosRender::Player &player, GosRender::Map &map) {
             wallSprite.setTexture(wall_texture);
             wallSprite.setTextureRect(sf::IntRect(pos * wall_texture.getSize().x, 0, 1, wall_texture.getSize().y));
             wallSprite.setScale(sf::Vector2f(1, (wall_height) / wall_texture.getSize().y));
-            wallSprite.setPosition(sf::Vector2f(ray, ceilling));
+            wallSprite.setPosition(sf::Vector2f(ray_column, ceilling));
             int color = 255 - sqrt((distance_to_wall / max_distance)) * 255;
             wallSprite.setColor(sf::Color(color, color, color));
             textured_walls.push_back(wallSprite);
         }
-
-        sf::Image image = RenderCeillingAndFloor(floor_texture, ceilling_texture, player);
-
+        image.create(screen_width, screen_height);
+        RenderFloor(floor_texture, image, player);
+        RenderCeillling(floor_texture, image, player);
         sf::Texture floorBack;
         floorBack.loadFromImage(image);
         sf::Sprite floorSprite;

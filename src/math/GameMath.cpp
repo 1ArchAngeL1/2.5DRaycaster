@@ -23,4 +23,9 @@ sf::Vector2f GosRender::Normalize(const sf::Vector2f &vec) {
     return sf::Vector2f(vec.x / vecLen, vec.y / vecLen);
 }
 
+
+float GosRender::RadianToGradus(const float &radian) {
+    return radian * (180 / PI);
+}
+
 const float GosRender::PI = 3.14159f;

@@ -14,6 +14,6 @@ file(
         src/*.cpp
 )
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} src/GameConstants.cpp src/GameConstants.h src/math/GameMath.cpp src/math/GameMath.h src/maze/MazeGeneration.cpp src/maze/MazeGeneration.h)
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} src/math/GameMath.cpp src/math/GameMath.h map/maze/MazeGeneration.cpp map/maze/MazeGeneration.h src/render/2.5D/2.5DRender.cpp src/render/2.5D/2.5DRender.h src/render/2D/2DRender.cpp src/render/2D/2DRender.h)
 
 target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-window sfml-system sfml-network)

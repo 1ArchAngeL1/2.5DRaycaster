@@ -17,6 +17,8 @@ namespace GosRender {
 
     float CosineOfAngleBetweenVectors(const sf::Vector2f&, const sf::Vector2f&);
 
+    float RadianToGradus(const float & radian);
+
     sf::Vector2f Normalize(const sf::Vector2f&);
 
     extern const float PI;
